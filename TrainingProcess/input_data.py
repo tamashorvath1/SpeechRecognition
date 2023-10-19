@@ -193,6 +193,7 @@ class AudioProcessor(object):
   def __init__(self, data_url, data_dir, silence_percentage, unknown_percentage,
                wanted_words, validation_percentage, testing_percentage,
                model_settings, summaries_dir):
+    print(data_dir)
     if data_dir:
       self.data_dir = data_dir
       self.maybe_download_and_extract_dataset(data_url, data_dir)
@@ -200,6 +201,8 @@ class AudioProcessor(object):
                               wanted_words, validation_percentage,
                               testing_percentage)
       self.prepare_background_data()
+    print(model_settings)
+    print(summaries_dir)    
     self.prepare_processing_graph(model_settings, summaries_dir)
 
   def maybe_download_and_extract_dataset(self, data_url, dest_directory):
@@ -399,6 +402,10 @@ class AudioProcessor(object):
       wav_loader = io_ops.read_file(self.wav_filename_placeholder_)
       wav_decoder = tf.audio.decode_wav(
           wav_loader, desired_channels=1, desired_samples=desired_samples)
+      print(desired_samples)
+      print(self.wav_filename_placeholder_)
+      print(wav_loader)
+      print(wav_decoder)
       # Allow the audio sample's volume to be adjusted.
       self.foreground_volume_placeholder_ = tf.compat.v1.placeholder(
           tf.float32, [], name='foreground_volume')
