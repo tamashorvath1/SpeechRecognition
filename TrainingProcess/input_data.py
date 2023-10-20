@@ -402,10 +402,6 @@ class AudioProcessor(object):
       wav_loader = io_ops.read_file(self.wav_filename_placeholder_)
       wav_decoder = tf.audio.decode_wav(
           wav_loader, desired_channels=1, desired_samples=desired_samples)
-      print(desired_samples)
-      print(self.wav_filename_placeholder_)
-      print(wav_loader)
-      print(wav_decoder)
       # Allow the audio sample's volume to be adjusted.
       self.foreground_volume_placeholder_ = tf.compat.v1.placeholder(
           tf.float32, [], name='foreground_volume')
@@ -448,6 +444,8 @@ class AudioProcessor(object):
       # implements. One method is to use average pooling to merge adjacent
       # buckets, but a more sophisticated approach is to apply the MFCC
       # algorithm to shrink the representation.
+      print(model_settings)
+      print(model_settings['preprocess'])
       if model_settings['preprocess'] == 'average':
         self.output_ = tf.nn.pool(
             input=tf.expand_dims(spectrogram, -1),
