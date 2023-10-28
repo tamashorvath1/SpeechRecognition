@@ -159,7 +159,7 @@ def create_inference_graph(wanted_words, sample_rate, clip_duration_ms,
   print(reshaped_input)
 
   logits = models.create_model(
-      reshaped_input, model_settings, model_architecture, is_training=False,
+      reshaped_input, model_settings, model_architecture, is_training=True,
       runtime_settings=runtime_settings)
   print(logits)
 
