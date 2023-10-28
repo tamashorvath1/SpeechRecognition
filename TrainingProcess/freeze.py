@@ -83,31 +83,24 @@ def create_inference_graph(wanted_words, sample_rate, clip_duration_ms,
   """
 
   words_list = input_data.prepare_words_list(wanted_words.split(','))
-  print(words_list)
   model_settings = models.prepare_model_settings(
       len(words_list), sample_rate, clip_duration_ms, window_size_ms,
       window_stride_ms, feature_bin_count, preprocess)
-  print(model_settings)
   runtime_settings = {'clip_stride_ms': clip_stride_ms}
-  print(runtime_settings)
 
   wav_data_placeholder = tf.compat.v1.placeholder(tf.string, [],
                                                   name='wav_data')
-  print(wav_data_placeholder)
   decoded_sample_data = tf.audio.decode_wav(
       wav_data_placeholder,
       desired_channels=1,
       desired_samples=model_settings['desired_samples'],
       name='decoded_sample_data')
-  print(decoded_sample_data)
   spectrogram = audio_ops.audio_spectrogram(
       decoded_sample_data.audio,
       window_size=model_settings['window_size_samples'],
       stride=model_settings['window_stride_samples'],
       magnitude_squared=True)
-  print(spectrogram)
 
-  print(preprocess)
   if preprocess == 'average':
     fingerprint_input = tf.nn.pool(
         input=tf.expand_dims(spectrogram, -1),
@@ -128,16 +121,12 @@ def create_inference_graph(wanted_words, sample_rate, clip_duration_ms,
           ' example'
           ' `bazel run tensorflow/examples/speech_commands:freeze_graph`')
     sample_rate = model_settings['sample_rate']
-    print(sample_rate)
     window_size_ms = (model_settings['window_size_samples'] *
                       1000) / sample_rate
-    print(window_size_ms)
     window_step_ms = (model_settings['window_stride_samples'] *
                       1000) / sample_rate
-    print(window_step_ms)
     int16_input = tf.cast(
         tf.multiply(decoded_sample_data.audio, 32767), tf.int16)
-    print(int16_input)
     micro_frontend = frontend_op.audio_microfrontend(
         int16_input,
         sample_rate=sample_rate,
@@ -146,26 +135,20 @@ def create_inference_graph(wanted_words, sample_rate, clip_duration_ms,
         num_channels=model_settings['fingerprint_width'],
         out_scale=1,
         out_type=tf.float32)
-    print(micro_frontend)
     fingerprint_input = tf.multiply(micro_frontend, (10.0 / 256.0))
-    print(fingerprint_input)
   else:
     raise Exception('Unknown preprocess mode "%s" (should be "mfcc",'
                     ' "average", or "micro")' % (preprocess))
 
   fingerprint_size = model_settings['fingerprint_size']
-  print(fingerprint_size)
   reshaped_input = tf.reshape(fingerprint_input, [-1, fingerprint_size])
-  print(reshaped_input)
 
   logits = models.create_model(
-      reshaped_input, model_settings, model_architecture, is_training=True,
+      reshaped_input, model_settings, model_architecture, is_training=False,
       runtime_settings=runtime_settings)
-  print(logits)
 
   # Create an output to use for inference.
   softmax = tf.nn.softmax(logits, name='labels_softmax')
-  print(softmax)
 
   return reshaped_input, softmax
 
