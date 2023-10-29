@@ -211,9 +211,12 @@ class AudioProcessor(object):
       data_url: Web location of the tar file containing the data set.
       dest_directory: File path to extract data to.
     """
-    if not data_url:
+    print(data_url)
+    print(dest_directory)
+    if not data_url:   
       return
     if not gfile.Exists(dest_directory):
+      print("gfile is not exist")
       os.makedirs(dest_directory)
       filename = data_url.split('/')[-1]
       filepath = os.path.join(dest_directory, filename)
@@ -240,6 +243,7 @@ class AudioProcessor(object):
               filename, statinfo.st_size))
         tarfile.open(filepath, 'r:gz').extractall(dest_directory)
     else:
+      print("gfile exists")
       return
 
   def prepare_data_index(self, silence_percentage, unknown_percentage,
