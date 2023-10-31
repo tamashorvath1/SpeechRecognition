@@ -94,6 +94,7 @@ def main(_):
       len(input_data.prepare_words_list(FLAGS.wanted_words.split(','))),
       FLAGS.sample_rate, FLAGS.clip_duration_ms, FLAGS.window_size_ms,
       FLAGS.window_stride_ms, FLAGS.feature_bin_count, FLAGS.preprocess)
+  print(model_settings)
   audio_processor = input_data.AudioProcessor(
       FLAGS.data_url, FLAGS.data_dir,
       FLAGS.silence_percentage, FLAGS.unknown_percentage,
@@ -323,7 +324,7 @@ if __name__ == '__main__':
       '--data_url',
       type=str,
       # pylint: disable=line-too-long
-      #default='https://storage.googleapis.com/download.tensorflow.org/data/speech_commands_v0.02.tar.gz',
+      default='https://storage.googleapis.com/download.tensorflow.org/data/speech_commands_v0.02.tar.gz',
       # pylint: enable=line-too-long
       help='Location of speech training data archive on the web.')
   parser.add_argument(
