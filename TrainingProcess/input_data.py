@@ -217,6 +217,7 @@ class AudioProcessor(object):
       data_url: Web location of the tar file containing the data set.
       dest_directory: File path to extract data to.
     """
+    return
     if not data_url:
       return
     if not os.path.exists(dest_directory):
