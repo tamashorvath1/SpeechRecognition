@@ -201,7 +201,7 @@ class AudioProcessor(object):
                               testing_percentage)
       self.prepare_background_data()
     self.prepare_processing_graph(model_settings, summaries_dir)
-'''
+  '''
   def maybe_download_and_extract_dataset(self, data_url, dest_directory):
     """Download and extract data set tar file.
 
@@ -243,7 +243,7 @@ class AudioProcessor(object):
       tf.compat.v1.logging.info('Successfully downloaded %s (%d bytes)',
                                 filename, statinfo.st_size)
       tarfile.open(filepath, 'r:gz').extractall(dest_directory)
-'''
+  '''
   def prepare_data_index(self, silence_percentage, unknown_percentage,
                          wanted_words, validation_percentage,
                          testing_percentage):
