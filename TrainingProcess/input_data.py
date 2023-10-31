@@ -15,7 +15,10 @@
 """Model definitions for simple speech recognition.
 
 """
-import os
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import hashlib
 import math
 import os.path
@@ -25,7 +28,8 @@ import sys
 import tarfile
 
 import numpy as np
-import urllib
+from six.moves import urllib
+from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
 from tensorflow.python.ops import gen_audio_ops as audio_ops
@@ -211,13 +215,13 @@ class AudioProcessor(object):
       data_url: Web location of the tar file containing the data set.
       dest_directory: File path to extract data to.
     """
-    if not data_url:   
+    if not data_url:
       return
-    if not gfile.Exists(dest_directory):
+    if not os.path.exists(dest_directory):
       os.makedirs(dest_directory)
     filename = data_url.split('/')[-1]
     filepath = os.path.join(dest_directory, filename)
-    if not gfile.Exists(filepath):
+    if not os.path.exists(filepath):
 
       def _progress(count, block_size, total_size):
         sys.stdout.write(
@@ -229,15 +233,15 @@ class AudioProcessor(object):
         filepath, _ = urllib.request.urlretrieve(data_url, filepath, _progress)
       except:
         tf.compat.v1.logging.error(
-          'Failed to download URL: {0} to folder: {1}. Please make sure you '
-          'have enough free space and an internet connection'.format(
-              data_url, filepath))
+            'Failed to download URL: %s to folder: %s', data_url, filepath)
+        tf.compat.v1.logging.error(
+            'Please make sure you have enough free space and'
+            ' an internet connection')
         raise
       print()
       statinfo = os.stat(filepath)
-      tf.compat.v1.logging.info(
-        'Successfully downloaded {0} ({1} bytes)'.format(
-            filename, statinfo.st_size))
+      tf.compat.v1.logging.info('Successfully downloaded %s (%d bytes)',
+                                filename, statinfo.st_size)
       tarfile.open(filepath, 'r:gz').extractall(dest_directory)
 
   def prepare_data_index(self, silence_percentage, unknown_percentage,
@@ -346,7 +350,7 @@ class AudioProcessor(object):
     """
     self.background_data = []
     background_dir = os.path.join(self.data_dir, BACKGROUND_NOISE_DIR_NAME)
-    if not gfile.Exists(background_dir):
+    if not os.path.exists(background_dir):
       return self.background_data
     with tf.compat.v1.Session(graph=tf.Graph()) as sess:
       wav_filename_placeholder = tf.compat.v1.placeholder(tf.string, [])
@@ -543,7 +547,7 @@ class AudioProcessor(object):
     pick_deterministically = (mode != 'training')
     # Use the processing graph we created earlier to repeatedly to generate the
     # final output sample data we'll use in training.
-    for i in range(offset, offset + sample_count):
+    for i in xrange(offset, offset + sample_count):
       # Pick which audio sample to use.
       if how_many == -1 or pick_deterministically:
         sample_index = i
