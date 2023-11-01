@@ -176,6 +176,8 @@ def main(_):
       train_step = tf.compat.v1.train.MomentumOptimizer(
           learning_rate_input, .9,
           use_nesterov=True).minimize(cross_entropy_mean)
+    elif optimizer == 'ADAM':
+      train_step = tf.compat.v1.train.AdamOptimizer(learning_rate_input)
     else:
       raise Exception('Invalid Optimizer')
   predicted_indices = tf.argmax(input=logits, axis=1)
