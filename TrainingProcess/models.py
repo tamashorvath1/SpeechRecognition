@@ -55,14 +55,7 @@ def prepare_model_settings(label_count, sample_rate, clip_duration_ms,
 
   Raises:
     ValueError: If the preprocessing mode isn't recognized.
-  """
-  print(label_count)
-  print(sample_rate)
-  print(clip_duration_ms)
-  print(window_size_ms)
-  print(window_stride_ms)
-  print(feature_bin_count)
-  print(preprocess)
+  """                             
   desired_samples = int(sample_rate * clip_duration_ms / 1000)
   window_size_samples = int(sample_rate * window_size_ms / 1000)
   window_stride_samples = int(sample_rate * window_stride_ms / 1000)
@@ -85,12 +78,6 @@ def prepare_model_settings(label_count, sample_rate, clip_duration_ms,
     raise ValueError('Unknown preprocess mode "%s" (should be "mfcc",'
                      ' "average", or "micro")' % (preprocess))
   fingerprint_size = fingerprint_width * spectrogram_length
-  print(desired_samples)
-  print(window_size_samples)
-  print(window_stride_samples)
-  print(spectrogram_length)
-  print(fingerprint_width)
-  print(fingerprint_size)
   return {
       'desired_samples': desired_samples,
       'window_size_samples': window_size_samples,
