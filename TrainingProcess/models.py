@@ -258,6 +258,10 @@ def create_conv_model(fingerprint_input, model_settings, is_training):
   input_time_size = model_settings['spectrogram_length']
   fingerprint_4d = tf.reshape(fingerprint_input,
                               [-1, input_time_size, input_frequency_size, 1])
+  print(input_frequency_size)
+  print(input_time_size)
+  print(fingerprint_4d)
+
   first_filter_width = 8
   first_filter_height = 20
   first_filter_count = 64
@@ -269,20 +273,25 @@ def create_conv_model(fingerprint_input, model_settings, is_training):
       name='first_bias',
       initializer=tf.compat.v1.zeros_initializer,
       shape=[first_filter_count])
-
+  print(first_weights)
+  print(first_bias)
   first_conv = tf.nn.conv2d(input=fingerprint_4d,
                             filters=first_weights,
                             strides=[1, 1, 1, 1],
                             padding='SAME') + first_bias
+  print(first_conv)
   first_relu = tf.nn.relu(first_conv)
+  print(first_relu)
   if is_training:
     first_dropout = tf.nn.dropout(first_relu, 1 - (dropout_prob))
+    print(first_dropout)
   else:
     first_dropout = first_relu
   max_pool = tf.nn.max_pool2d(input=first_dropout,
                               ksize=[1, 2, 2, 1],
                               strides=[1, 2, 2, 1],
                               padding='SAME')
+  print(max_pool)
   second_filter_width = 4
   second_filter_height = 10
   second_filter_count = 64
@@ -297,33 +306,47 @@ def create_conv_model(fingerprint_input, model_settings, is_training):
       name='second_bias',
       initializer=tf.compat.v1.zeros_initializer,
       shape=[second_filter_count])
+  print(second_weights)
+  print(second_bias)
   second_conv = tf.nn.conv2d(input=max_pool,
                              filters=second_weights,
                              strides=[1, 1, 1, 1],
                              padding='SAME') + second_bias
+  print(second_bias)
   second_relu = tf.nn.relu(second_conv)
+  print(second_bias)
   if is_training:
     second_dropout = tf.compat.v1.nn.dropout(second_relu, dropout_prob)
+    print(second_bias)
   else:
     second_dropout = second_relu
   second_conv_shape = second_dropout.get_shape()
   second_conv_output_width = second_conv_shape[2]
   second_conv_output_height = second_conv_shape[1]
+  print(second_conv_shape)
+  print(second_conv_output_width)
+  print(second_conv_output_height)
   second_conv_element_count = int(
       second_conv_output_width * second_conv_output_height *
       second_filter_count)
+  print(second_conv_element_count)
   flattened_second_conv = tf.reshape(second_dropout,
                                      [-1, second_conv_element_count])
+  print(flattened_second_conv)
   label_count = model_settings['label_count']
+  print(label_count)
   final_fc_weights = tf.compat.v1.get_variable(
       name='final_fc_weights',
       initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.01),
       shape=[second_conv_element_count, label_count])
+  print(final_fc_weights)
   final_fc_bias = tf.compat.v1.get_variable(
       name='final_fc_bias',
       initializer=tf.compat.v1.zeros_initializer,
       shape=[label_count])
+  print(final_fc_bias)
   final_fc = tf.matmul(flattened_second_conv, final_fc_weights) + final_fc_bias
+  print(final_fc)
   if is_training:
     return final_fc, dropout_prob
   else:
