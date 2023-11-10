@@ -312,12 +312,12 @@ def create_conv_model(fingerprint_input, model_settings, is_training):
                              filters=second_weights,
                              strides=[1, 1, 1, 1],
                              padding='SAME') + second_bias
-  print(second_bias)
+  print(second_conv)
   second_relu = tf.nn.relu(second_conv)
-  print(second_bias)
+  print(second_relu)
   if is_training:
     second_dropout = tf.compat.v1.nn.dropout(second_relu, dropout_prob)
-    print(second_bias)
+    print(second_dropout)
   else:
     second_dropout = second_relu
   second_conv_shape = second_dropout.get_shape()
