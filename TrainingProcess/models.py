@@ -997,8 +997,8 @@ def myModelThesis(fingerprint_input, model_settings,
                             strides=[1, 2, 2, 1],
                             padding='SAME')
 
-  third_filter_width = 3
-  third_filter_height = 3
+  third_filter_width = 5
+  third_filter_height = 5
   third_filter_count = 64
   third_weights = tf.compat.v1.get_variable(
       name='third_weights',
