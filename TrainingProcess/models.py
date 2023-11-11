@@ -1025,7 +1025,7 @@ def myModelThesis(fingerprint_input, model_settings,
   third_conv_output_height = third_conv_shape[1]
   third_conv_element_count = int(
       third_conv_output_width * third_conv_output_height *
-      third_conv_element_count)
+      third_filter_count)
   flattened_third_conv = tf.reshape(third_dropout,
                                      [-1, third_conv_element_count])
   label_count = model_settings['label_count']
