@@ -1028,6 +1028,178 @@ def myModelThesis(fingerprint_input, model_settings,
       third_filter_count)
   flattened_third_conv = tf.reshape(third_dropout,
                                      [-1, third_conv_element_count])
+  
+  first_fc_output_channels = 128
+  first_fc_weights = tf.compat.v1.get_variable(
+      name='first_fc_weights',
+      initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.01),
+      shape=[third_conv_element_count, first_fc_output_channels])
+  first_fc_bias = tf.compat.v1.get_variable(
+      name='first_fc_bias',
+      initializer=tf.compat.v1.zeros_initializer,
+      shape=[first_fc_output_channels])
+  first_fc = tf.matmul(flattened_third_conv, first_fc_weights) + first_fc_bias
+  if is_training:
+    second_fc_input = tf.nn.dropout(first_fc, 1 - (dropout_prob))
+  else:
+    second_fc_input = first_fc
+  second_fc_output_channels = 128
+  second_fc_weights = tf.compat.v1.get_variable(
+      name='second_fc_weights',
+      initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.01),
+      shape=[first_fc_output_channels, second_fc_output_channels])
+  second_fc_bias = tf.compat.v1.get_variable(
+      name='second_fc_bias',
+      initializer=tf.compat.v1.zeros_initializer,
+      shape=[second_fc_output_channels])
+  second_fc = tf.matmul(second_fc_input, second_fc_weights) + second_fc_bias
+  if is_training:
+    final_fc_input = tf.nn.dropout(second_fc, 1 - (dropout_prob))
+  else:
+    final_fc_input = second_fc
+  label_count = model_settings['label_count']
+  final_fc_weights = tf.compat.v1.get_variable(
+      name='final_fc_weights',
+      initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.01),
+      shape=[second_fc_output_channels, label_count])
+  final_fc_bias = tf.compat.v1.get_variable(
+      name='final_fc_bias',
+      initializer=tf.compat.v1.zeros_initializer,
+      shape=[label_count])
+  final_fc = tf.matmul(final_fc_input, final_fc_weights) + final_fc_bias
+  if is_training:
+    return final_fc, dropout_prob
+  else:
+    return final_fc
+
+def myModelThesis_v0(fingerprint_input, model_settings,
+                                     is_training):
+  """Builds a convolutional model for my thesis.
+
+  Here's the layout of the graph:
+  conv_model + 2 conv layer + 1 fc layer
+  (fingerprint_input)
+          v
+      [Conv2D]<-(weights)
+          v
+      [BiasAdd]<-(bias)
+          v
+        [Relu]
+          v
+      [MaxPool]
+          v
+      [Conv2D]<-(weights)
+          v
+      [BiasAdd]<-(bias)
+          v
+        [Relu]
+          v
+      [MaxPool]
+          v
+      [MatMul]<-(weights)
+          v
+      [BiasAdd]<-(bias)
+          v
+
+  Args:
+    fingerprint_input: TensorFlow node that will output audio feature vectors.
+    model_settings: Dictionary of information about the model.
+    is_training: Whether the model is going to be used for training.
+
+  Returns:
+    TensorFlow node outputting logits results, and optionally a dropout
+    placeholder.
+  """
+  if is_training:
+    dropout_prob = tf.compat.v1.placeholder(tf.float32, name='dropout_prob')
+  input_frequency_size = model_settings['fingerprint_width']
+  input_time_size = model_settings['spectrogram_length']
+  fingerprint_4d = tf.reshape(fingerprint_input,
+                              [-1, input_time_size, input_frequency_size, 1])
+  first_filter_width = 8
+  first_filter_height = 20
+  first_filter_count = 64
+  first_weights = tf.compat.v1.get_variable(
+      name='first_weights',
+      initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.01),
+      shape=[first_filter_height, first_filter_width, 1, first_filter_count])
+  first_bias = tf.compat.v1.get_variable(
+      name='first_bias',
+      initializer=tf.compat.v1.zeros_initializer,
+      shape=[first_filter_count])
+
+  first_conv = tf.nn.conv2d(input=fingerprint_4d,
+                            filters=first_weights,
+                            strides=[1, 1, 1, 1],
+                            padding='SAME') + first_bias
+  first_relu = tf.nn.relu(first_conv)
+  if is_training:
+    first_dropout = tf.nn.dropout(first_relu, 1 - (dropout_prob))
+  else:
+    first_dropout = first_relu
+  first_max_pool = tf.nn.max_pool2d(input=first_dropout,
+                              ksize=[1, 2, 2, 1],
+                              strides=[1, 2, 2, 1],
+                              padding='SAME')
+  second_filter_width = 4
+  second_filter_height = 10
+  second_filter_count = 64
+  second_weights = tf.compat.v1.get_variable(
+      name='second_weights',
+      initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.01),
+      shape=[
+          second_filter_height, second_filter_width, second_filter_count,
+          second_filter_count
+      ])
+  second_bias = tf.compat.v1.get_variable(
+      name='second_bias',
+      initializer=tf.compat.v1.zeros_initializer,
+      shape=[second_filter_count])
+  second_conv = tf.nn.conv2d(input=first_max_pool,
+                             filters=second_weights,
+                             strides=[1, 1, 1, 1],
+                             padding='SAME') + second_bias
+  second_relu = tf.nn.relu(second_conv)
+  if is_training:
+    second_dropout = tf.compat.v1.nn.dropout(second_relu, dropout_prob)
+  else:
+    second_dropout = second_relu
+  second_max_pool = tf.nn.max_pool2d(input=second_dropout,
+                            ksize=[1, 3, 2, 1],
+                            strides=[1, 2, 2, 1],
+                            padding='SAME')
+
+  third_filter_width = 2
+  third_filter_height = 5
+  third_filter_count = 64
+  third_weights = tf.compat.v1.get_variable(
+      name='third_weights',
+      initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.01),
+      shape=[third_filter_height, third_filter_width, 1, third_filter_count])
+  third_bias = tf.compat.v1.get_variable(
+      name='third_bias',
+      initializer=tf.compat.v1.zeros_initializer,
+      shape=[third_filter_count])
+
+  third_conv = tf.nn.conv2d(input=second_max_pool,
+                            filters=third_weights,
+                            strides=[1, 1, 1, 1],
+                            padding='SAME') + third_bias
+  third_relu = tf.nn.relu(third_conv)
+  if is_training:
+    third_dropout = tf.nn.dropout(third_relu, 1 - (dropout_prob))
+  else:
+    third_dropout = third_relu
+  
+  
+  third_conv_shape = third_dropout.get_shape()
+  third_conv_output_width = third_conv_shape[2]
+  third_conv_output_height = third_conv_shape[1]
+  third_conv_element_count = int(
+      third_conv_output_width * third_conv_output_height *
+      third_filter_count)
+  flattened_third_conv = tf.reshape(third_dropout,
+                                     [-1, third_conv_element_count])
   label_count = model_settings['label_count']
   final_fc_weights = tf.compat.v1.get_variable(
       name='final_fc_weights',
