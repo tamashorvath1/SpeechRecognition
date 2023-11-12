@@ -977,7 +977,7 @@ def myModelThesis(fingerprint_input, model_settings,
       name='second_weights',
       initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.01),
       shape=[
-          second_filter_height, second_filter_width, second_filter_count,
+          second_filter_height, second_filter_width, first_filter_count,
           second_filter_count
       ])
   second_bias = tf.compat.v1.get_variable(
