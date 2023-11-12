@@ -929,6 +929,10 @@ def myModelThesis(fingerprint_input, model_settings,
           v
       [BiasAdd]<-(bias)
           v
+      [MatMul]<-(weights)
+          v
+      [BiasAdd]<-(bias)
+          v
 
   Args:
     fingerprint_input: TensorFlow node that will output audio feature vectors.
