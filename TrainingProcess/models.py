@@ -1003,39 +1003,12 @@ def myModelThesis(fingerprint_input, model_settings,
   flattened_second_conv = tf.reshape(second_dropout,
                                      [-1, second_conv_element_count])
   
-  first_fc_output_channels = 128
-  first_fc_weights = tf.compat.v1.get_variable(
-      name='first_fc_weights',
-      initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.01),
-      shape=[third_conv_element_count, first_fc_output_channels])
-  first_fc_bias = tf.compat.v1.get_variable(
-      name='first_fc_bias',
-      initializer=tf.compat.v1.zeros_initializer,
-      shape=[first_fc_output_channels])
-  first_fc = tf.matmul(flattened_second_conv, first_fc_weights) + first_fc_bias
-  if is_training:
-    second_fc_input = tf.nn.dropout(first_fc, 1 - (dropout_prob))
-  else:
-    second_fc_input = first_fc
-  second_fc_output_channels = 128
-  second_fc_weights = tf.compat.v1.get_variable(
-      name='second_fc_weights',
-      initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.01),
-      shape=[first_fc_output_channels, second_fc_output_channels])
-  second_fc_bias = tf.compat.v1.get_variable(
-      name='second_fc_bias',
-      initializer=tf.compat.v1.zeros_initializer,
-      shape=[second_fc_output_channels])
-  second_fc = tf.matmul(second_fc_input, second_fc_weights) + second_fc_bias
-  if is_training:
-    final_fc_input = tf.nn.dropout(second_fc, 1 - (dropout_prob))
-  else:
-    final_fc_input = second_fc
+  
   label_count = model_settings['label_count']
   final_fc_weights = tf.compat.v1.get_variable(
       name='final_fc_weights',
       initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.01),
-      shape=[second_fc_output_channels, label_count])
+      shape=[second_conv_element_count, label_count])
   final_fc_bias = tf.compat.v1.get_variable(
       name='final_fc_bias',
       initializer=tf.compat.v1.zeros_initializer,
