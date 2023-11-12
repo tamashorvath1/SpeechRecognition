@@ -1013,7 +1013,7 @@ def myModelThesis(fingerprint_input, model_settings,
       name='final_fc_bias',
       initializer=tf.compat.v1.zeros_initializer,
       shape=[label_count])
-  final_fc = tf.matmul(final_fc_input, final_fc_weights) + final_fc_bias
+  final_fc = tf.matmul(flattened_second_conv, final_fc_weights) + final_fc_bias
   if is_training:
     return final_fc, dropout_prob
   else:
