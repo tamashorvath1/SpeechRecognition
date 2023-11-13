@@ -1007,7 +1007,7 @@ def myModelThesis(fingerprint_input, model_settings,
   flattened_second_conv = tf.reshape(second_dropout,
                                      [-1, second_conv_element_count])
   
-  first_fc_output_channels = 128
+  first_fc_output_channels = 32
   first_fc_weights = tf.compat.v1.get_variable(
       name='first_fc_weights',
       initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.01),
